@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { errorHandler } from "./middleware/error";
 import { userRoutes } from "./routes/users";
+import { healthRoutes } from "./routes/health";
 
 const port = Number(process.env.PORT || 3000);
 
@@ -18,6 +19,7 @@ const app = new Elysia()
   }))
   .use(errorHandler)
   .use(userRoutes)
+  .use(healthRoutes)
   .get("/", () => ({
     message: "Welcome to Bun + Elysia + Drizzle REST API! Visit /swagger for documentation.",
     docs: "/swagger",
@@ -29,3 +31,4 @@ console.log(`📖 API Documentation available at http://${app.server?.hostname}:
 
 export type App = typeof app;
 export default app;
+
