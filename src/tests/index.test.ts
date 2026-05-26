@@ -122,4 +122,15 @@ describe("Elysia Users REST API", () => {
     );
     expect(response.status).toBe(404);
   });
+
+  it("should return healthy status for API health check", async () => {
+    const response = await app
+      .handle(new Request("http://localhost/api/health"))
+      .then((res) => res.json());
+
+    expect(response.status).toBe("healthy");
+    expect(response.database).toBe("connected");
+    expect(response.uptime).toBeNumber();
+  });
 });
+
