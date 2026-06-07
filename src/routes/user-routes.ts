@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { userService } from "../services/users";
+import { userService } from "../services/user-service";
 
 export const userRoutes = new Elysia({ prefix: "/api/users" })
   .get("/", async () => {
@@ -45,8 +45,9 @@ export const userRoutes = new Elysia({ prefix: "/api/users" })
     }
   }, {
     body: t.Object({
-      name: t.String({ minLength: 1, maxLength: 255 }),
-      email: t.String({ format: "email" }),
+      name: t.String({ minLength: 1, maxLength: 100 }),
+      email: t.String({ format: "email", maxLength: 100 }),
+      password: t.String({ minLength: 6, maxLength: 100 }),
     }),
   })
   .put("/:id", async ({ params: { id }, body, set }) => {
@@ -76,8 +77,9 @@ export const userRoutes = new Elysia({ prefix: "/api/users" })
       id: t.Numeric(),
     }),
     body: t.Object({
-      name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
-      email: t.Optional(t.String({ format: "email" })),
+      name: t.Optional(t.String({ minLength: 1, maxLength: 100 })),
+      email: t.Optional(t.String({ format: "email", maxLength: 100 })),
+      password: t.Optional(t.String({ minLength: 6, maxLength: 100 })),
     }),
   })
   .delete("/:id", async ({ params: { id }, set }) => {
