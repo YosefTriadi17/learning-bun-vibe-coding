@@ -1,8 +1,17 @@
 import { Elysia } from "elysia";
 
 export const errorHandler = new Elysia({ name: "error-handler" })
-  .onError(({ code, error, set }) => {
+  .onError({ as: "global" }, ({ code, error, set }) => {
     console.error(`[Error] Code: ${code} | Message:`, error.message);
+
+    if (code === "VALIDATION") {
+      set.status = 400;
+      return {
+        success: false,
+        message: "Validation Error",
+        errors: error.message,
+      };
+    }
 
     // Handle HTTP errors thrown by Elysia's error() helper
     const status = (error as any).status || (error as any).statusCode;
@@ -17,15 +26,6 @@ export const errorHandler = new Elysia({ name: "error-handler" })
       return {
         success: false,
         message: error.message || "HTTP Error",
-      };
-    }
-
-    if (code === "VALIDATION") {
-      set.status = 400;
-      return {
-        success: false,
-        message: "Validation Error",
-        errors: error.message,
       };
     }
 

@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { errorHandler } from "./middleware/error";
-import { userRoutes } from "./routes/users";
+import { userRoutes } from "./routes/user-routes";
 import { healthRoutes } from "./routes/health";
 
 const port = Number(process.env.PORT || 3000);
