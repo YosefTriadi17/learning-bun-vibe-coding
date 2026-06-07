@@ -1,0 +1,25 @@
+buatkan issue.md yang berisi perencanaan untuk nanti di implementasikan oleh junior program atau ai yang lebih murah.
+
+Planning:
+
+buat tabel sessions:
+id int autoincrement primary key
+token varchar(255) not null (uuid untuk token user yang login)
+user_id int not null (foreign key ke tabel users)
+created_at datetime default current_timestamp
+expired_at datetime default current_timestamp
+
+lalu buatkan endpoint untuk login user:
+POST /api/auth/login - untuk login user berdasarkan email dan password
+POST /api/auth/logout - untuk logout user berdasarkan token
+POST /api/auth/register - untuk register user baru
+
+struktur folder src:
+- routes : routing elysia js
+- services : logic bisnis app
+
+struktur file
+- routes : user-routes.ts
+- services : user-service.ts
+
+Jelaskan tahapan yang harus dilakukan untuk mengimplementasikan fitur ini, anggap yang mengijmplementasikan fitur ini adalah junior programmer atau model AI yang lebih murah.
