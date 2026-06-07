@@ -48,23 +48,30 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
       password: t.String({ minLength: 1, maxLength: 100 }),
     }),
   })
-  .post("/logout", async ({ body, set }) => {
-    const success = await authService.logout(body.token);
-    if (!success) {
-      set.status = 404;
+  .post("/logout", async ({ headers, set }) => {
+    const authHeader = headers["authorization"];
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      set.status = 401;
       return {
         success: false,
-        message: "Session not found or already expired",
+        message: "Authorization token is required",
       };
     }
+
+    const token = authHeader.replace("Bearer ", "");
+    const user = await authService.logout(token);
+    if (!user) {
+      set.status = 401;
+      return {
+        success: false,
+        message: "Invalid or expired token",
+      };
+    }
+
     return {
       success: true,
-      message: "Logout successful",
+      data: user,
     };
-  }, {
-    body: t.Object({
-      token: t.String({ minLength: 1 }),
-    }),
   })
   .post("/current-user", async ({ headers, set }) => {
     const authHeader = headers["authorization"];

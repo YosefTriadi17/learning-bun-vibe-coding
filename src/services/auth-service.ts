@@ -72,9 +72,24 @@ export class AuthService {
     };
   }
 
-  async logout(token: string): Promise<boolean> {
-    const [result] = await db.delete(sessions).where(eq(sessions.token, token));
-    return result.affectedRows > 0;
+  async logout(token: string): Promise<Omit<User, "password"> | null> {
+    const [session] = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.token, token));
+
+    if (!session) return null;
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, session.userId));
+
+    if (!user) return null;
+
+    await db.delete(sessions).where(eq(sessions.token, token));
+
+    return excludePassword(user);
   }
 
   async getCurrentUser(token: string): Promise<Omit<User, "password"> | null> {

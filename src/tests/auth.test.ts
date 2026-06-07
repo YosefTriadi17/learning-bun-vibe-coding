@@ -207,17 +207,17 @@ describe("Elysia Auth REST API", () => {
         new Request("http://localhost/api/auth/logout", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionToken}`,
           },
-          body: JSON.stringify({
-            token: sessionToken,
-          }),
         })
       )
       .then((res) => res.json());
 
     expect(response.success).toBe(true);
-    expect(response.message).toBe("Logout successful");
+    expect(response.data).toBeDefined();
+    expect(response.data.name).toBe("Alice Smith");
+    expect(response.data.email).toBe("alice@example.com");
+    expect(response.data.password).toBeUndefined();
   });
 
   it("should fail logout with invalid token", async () => {
@@ -226,17 +226,28 @@ describe("Elysia Auth REST API", () => {
         new Request("http://localhost/api/auth/logout", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            Authorization: "Bearer invalid-uuid-token-123456",
           },
-          body: JSON.stringify({
-            token: "invalid-uuid-token-123456",
-          }),
         })
       );
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(401);
     const body = await response.json();
     expect(body.success).toBe(false);
-    expect(body.message).toBe("Session not found or already expired");
+    expect(body.message).toBe("Invalid or expired token");
+  });
+
+  it("should fail logout without Authorization header", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/auth/logout", {
+          method: "POST",
+        })
+      );
+
+    expect(response.status).toBe(401);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.message).toBe("Authorization token is required");
   });
 });
