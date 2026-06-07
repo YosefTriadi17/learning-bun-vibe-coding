@@ -76,6 +76,27 @@ export class AuthService {
     const [result] = await db.delete(sessions).where(eq(sessions.token, token));
     return result.affectedRows > 0;
   }
+
+  async getCurrentUser(token: string): Promise<Omit<User, "password"> | null> {
+    const [session] = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.token, token));
+
+    if (!session) return null;
+
+    const now = new Date();
+    if (session.expiredAt < now) return null;
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, session.userId));
+
+    if (!user) return null;
+
+    return excludePassword(user);
+  }
 }
 
 export const authService = new AuthService();
