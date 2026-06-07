@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { db } from "../db/connection";
 import { sql } from "drizzle-orm";
 
-export const healthRoutes = new Elysia({ prefix: "/api/health" })
+export const healthRoutes = new Elysia({ prefix: "/api/health", detail: { tags: ["Health"] } })
   .get("/", async ({ set }) => {
     try {
       // Query database to ensure connection is healthy

@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { authService } from "../services/auth-service";
 
-export const authRoutes = new Elysia({ prefix: "/api/auth" })
+export const authRoutes = new Elysia({ prefix: "/api/auth", detail: { tags: ["Auth"] } })
   .post("/register", async ({ body, set }) => {
     try {
       const result = await authService.register(body);

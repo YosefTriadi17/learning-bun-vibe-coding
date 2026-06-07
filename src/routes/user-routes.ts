@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { userService } from "../services/user-service";
 
-export const userRoutes = new Elysia({ prefix: "/api/users" })
+export const userRoutes = new Elysia({ prefix: "/api/users", detail: { tags: ["Users"] } })
   .get("/", async () => {
     const users = await userService.findAll();
     return {
