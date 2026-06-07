@@ -2,32 +2,6 @@ buatkan issue.md yang berisi perencanaan untuk nanti di implementasikan oleh jun
 
 Planning:
 
-lalu buatkan endpoint untuk logout user:
-POST /api/auth/logout - untuk logout user berdasarkan token
+Tambahkan swagger di project ini, agar user lain bisa dengan mudah testing aplikasi ini dengan swagger.
 
-Headers:
-Authorization: Bearer <token> (token yang ada di tabel sessions)
-
-response 
-{
-    "success": true,
-    "data": {
-        "id": 1,
-        "name": "Adi Supriyadi",
-        "email": "[EMAIL_ADDRESS]",
-        "created_at": "2022-01-01T00:00:00.000Z",
-        "updated_at": "2022-01-01T00:00:00.000Z"
-    }
-}
-
-jika user logout, hapus token yang ada di tabel sessions
-
-struktur folder src:
-- routes : routing elysia js
-- services : logic bisnis app
-
-struktur file
-- routes : user-routes.ts
-- services : user-service.ts
-
-Jelaskan tahapan yang harus dilakukan untuk mengimplementasikan fitur ini, anggap yang mengijmplementasikan fitur ini adalah junior programmer atau model AI yang lebih murah.
+buat tahan yang dilakukan untuk implementasi fitur ini, jelaskan secara detail agar junior programmer atau ai yang lebih murah dapat memahami dan mengimplementasikan fitur ini dengan mudah.
