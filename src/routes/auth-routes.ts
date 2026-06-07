@@ -65,4 +65,30 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
     body: t.Object({
       token: t.String({ minLength: 1 }),
     }),
+  })
+  .post("/current-user", async ({ headers, set }) => {
+    const authHeader = headers["authorization"];
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      set.status = 401;
+      return {
+        success: false,
+        message: "Authorization token is required",
+      };
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const user = await authService.getCurrentUser(token);
+    if (!user) {
+      set.status = 401;
+      return {
+        success: false,
+        message: "Invalid or expired token",
+      };
+    }
+
+    return {
+      success: true,
+      data: user,
+    };
   });
+

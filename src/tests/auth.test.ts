@@ -150,6 +150,57 @@ describe("Elysia Auth REST API", () => {
     expect(body.message).toBe("Invalid email or password");
   });
 
+  it("should retrieve current user details successfully with valid token", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/auth/current-user", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        })
+      )
+      .then((res) => res.json());
+
+    expect(response.success).toBe(true);
+    expect(response.data).toBeDefined();
+    expect(response.data.id).toBeDefined();
+    expect(response.data.name).toBe("Alice Smith");
+    expect(response.data.email).toBe("alice@example.com");
+    expect(response.data.password).toBeUndefined();
+  });
+
+  it("should fail to retrieve current user if token is missing", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/auth/current-user", {
+          method: "POST",
+        })
+      );
+
+    expect(response.status).toBe(401);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.message).toBe("Authorization token is required");
+  });
+
+  it("should fail to retrieve current user if token is invalid", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/auth/current-user", {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer invalid-uuid-token",
+          },
+        })
+      );
+
+    expect(response.status).toBe(401);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.message).toBe("Invalid or expired token");
+  });
+
   it("should logout successfully with valid token", async () => {
     const response = await app
       .handle(
