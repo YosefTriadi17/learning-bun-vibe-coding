@@ -1,7 +1,21 @@
 import { Elysia, t } from "elysia";
 import { authService } from "../services/auth-service";
 
-export const authRoutes = new Elysia({ prefix: "/api/auth" })
+const userResponseSchema = t.Object({
+  id: t.Number(),
+  name: t.String(),
+  email: t.String(),
+  createdAt: t.Any(),
+  updatedAt: t.Any(),
+});
+
+const authResponseSchema = t.Object({
+  user: userResponseSchema,
+  token: t.String(),
+  expiredAt: t.Any(),
+});
+
+export const authRoutes = new Elysia({ prefix: "/api/auth", detail: { tags: ["Auth"] } })
   .post("/register", async ({ body, set }) => {
     try {
       const result = await authService.register(body);
@@ -39,6 +53,17 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
         error: "Password harus berukuran 6-100 karakter" 
       }),
     }),
+    response: {
+      201: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+        data: authResponseSchema,
+      }),
+      409: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+      }),
+    },
   })
   .post("/login", async ({ body, set }) => {
     const result = await authService.login(body.email, body.password);
@@ -67,6 +92,17 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
         error: "Password tidak boleh kosong atau lebih dari 100 karakter" 
       }),
     }),
+    response: {
+      200: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+        data: authResponseSchema,
+      }),
+      401: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+      }),
+    },
   })
   .group("", (app) =>
     app
@@ -111,12 +147,39 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
           success: true,
           data: user!,
         };
+      }, {
+        headers: t.Object({
+          authorization: t.Optional(t.String({ description: "Bearer <token>" }))
+        }),
+        response: {
+          200: t.Object({
+            success: t.Boolean(),
+            data: userResponseSchema,
+          }),
+          401: t.Object({
+            success: t.Boolean(),
+            message: t.String(),
+          }),
+        },
       })
       .post("/current-user", async ({ user }) => {
         return {
           success: true,
           data: user!,
         };
+      }, {
+        headers: t.Object({
+          authorization: t.Optional(t.String({ description: "Bearer <token>" }))
+        }),
+        response: {
+          200: t.Object({
+            success: t.Boolean(),
+            data: userResponseSchema,
+          }),
+          401: t.Object({
+            success: t.Boolean(),
+            message: t.String(),
+          }),
+        },
       })
   );
-

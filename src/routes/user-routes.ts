@@ -1,13 +1,28 @@
 import { Elysia, t } from "elysia";
 import { userService } from "../services/user-service";
 
-export const userRoutes = new Elysia({ prefix: "/api/users" })
+const userResponseSchema = t.Object({
+  id: t.Number(),
+  name: t.String(),
+  email: t.String(),
+  createdAt: t.Any(),
+  updatedAt: t.Any(),
+});
+
+export const userRoutes = new Elysia({ prefix: "/api/users", detail: { tags: ["Users"] } })
   .get("/", async () => {
     const users = await userService.findAll();
     return {
       success: true,
       data: users,
     };
+  }, {
+    response: {
+      200: t.Object({
+        success: t.Boolean(),
+        data: t.Array(userResponseSchema),
+      }),
+    },
   })
   .get("/:id", async ({ params: { id }, set }) => {
     const user = await userService.findById(Number(id));
@@ -23,6 +38,16 @@ export const userRoutes = new Elysia({ prefix: "/api/users" })
     params: t.Object({
       id: t.Numeric(),
     }),
+    response: {
+      200: t.Object({
+        success: t.Boolean(),
+        data: userResponseSchema,
+      }),
+      404: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+      }),
+    },
   })
   .post("/", async ({ body, set }) => {
     try {
@@ -61,6 +86,17 @@ export const userRoutes = new Elysia({ prefix: "/api/users" })
         error: "Password harus berukuran 6-100 karakter" 
       }),
     }),
+    response: {
+      201: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+        data: userResponseSchema,
+      }),
+      409: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+      }),
+    },
   })
   .put("/:id", async ({ params: { id }, body, set }) => {
     try {
@@ -105,6 +141,21 @@ export const userRoutes = new Elysia({ prefix: "/api/users" })
         error: "Password harus berukuran 6-100 karakter" 
       })),
     }),
+    response: {
+      200: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+        data: userResponseSchema,
+      }),
+      404: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+      }),
+      409: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+      }),
+    },
   })
   .delete("/:id", async ({ params: { id }, set }) => {
     const success = await userService.delete(Number(id));
@@ -120,5 +171,14 @@ export const userRoutes = new Elysia({ prefix: "/api/users" })
     params: t.Object({
       id: t.Numeric(),
     }),
+    response: {
+      200: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+      }),
+      404: t.Object({
+        success: t.Boolean(),
+        message: t.String(),
+      }),
+    },
   });
-

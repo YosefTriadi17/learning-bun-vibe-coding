@@ -13,12 +13,18 @@ export type AuthResponse = {
   expiredAt: Date;
 };
 
+/**
+ * Menghapus field password dari objek user sebelum dikembalikan ke client
+ */
 function excludePassword(user: User): Omit<User, "password"> {
   const { password, ...userWithoutPassword } = user;
   return userWithoutPassword;
 }
 
 export class AuthService {
+  /**
+   * Mendaftarkan pengguna baru beserta pembuatan sesi (token)
+   */
   async register(data: NewUser): Promise<AuthResponse> {
     const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
 
@@ -48,6 +54,9 @@ export class AuthService {
     };
   }
 
+  /**
+   * Melakukan autentikasi pengguna dan mengembalikan token sesi baru
+   */
   async login(email: string, password: string): Promise<AuthResponse | null> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     if (!user) return null;
@@ -72,6 +81,9 @@ export class AuthService {
     };
   }
 
+  /**
+   * Menghapus sesi pengguna berdasarkan token yang diberikan
+   */
   async logout(token: string): Promise<Omit<User, "password"> | null> {
     const [session] = await db
       .select()
@@ -98,6 +110,9 @@ export class AuthService {
     return excludePassword(user);
   }
 
+  /**
+   * Mengambil data pengguna yang sedang aktif berdasarkan token sesi
+   */
   async getCurrentUser(token: string): Promise<Omit<User, "password"> | null> {
     const [session] = await db
       .select()
