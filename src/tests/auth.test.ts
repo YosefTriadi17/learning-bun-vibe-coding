@@ -83,6 +83,75 @@ describe("Elysia Auth REST API", () => {
     expect(body.message).toBe("Validation Error");
   });
 
+  it("should fail validation if name exceeds 100 characters on register", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "a".repeat(101),
+            email: "longname@example.com",
+            password: "password123",
+          }),
+        })
+      );
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.message).toBe("Validation Error");
+    expect(body.errors).toContain("Nama tidak boleh kosong atau lebih dari 100 karakter");
+  });
+
+  it("should fail validation if email exceeds 100 characters on register", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "Alice Smith",
+            email: "a".repeat(90) + "@example.com",
+            password: "password123",
+          }),
+        })
+      );
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.message).toBe("Validation Error");
+    expect(body.errors).toContain("Email tidak valid atau lebih dari 100 karakter");
+  });
+
+  it("should fail validation if password exceeds 100 characters on register", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "Alice Smith",
+            email: "longpwd@example.com",
+            password: "a".repeat(101),
+          }),
+        })
+      );
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.message).toBe("Validation Error");
+    expect(body.errors).toContain("Password harus berukuran 6-100 karakter");
+  });
+
   it("should login successfully with correct credentials", async () => {
     const response = await app
       .handle(

@@ -120,6 +120,50 @@ describe("Elysia Users REST API", () => {
     expect(body.message).toBe("Validation Error");
   });
 
+  it("should fail validation if email format is invalid on create", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "Invalid Email",
+            email: "notanemail",
+            password: "password123",
+          }),
+        })
+      );
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.errors).toContain("Email tidak valid atau lebih dari 100 karakter");
+  });
+
+  it("should fail validation if fields exceed 100 characters on create", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "a".repeat(101),
+            email: "valid@example.com",
+            password: "password123",
+          }),
+        })
+      );
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.errors).toContain("Nama tidak boleh kosong atau lebih dari 100 karakter");
+  });
+
   it("should get user by id", async () => {
     const response = await app
       .handle(new Request(`http://localhost/api/users/${createdUser.id}`))
@@ -151,6 +195,83 @@ describe("Elysia Users REST API", () => {
     expect(response.data.password).toBeUndefined();
   });
 
+  it("should return 404 for updating non-existent user", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/users/99999", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "Does Not Exist",
+          }),
+        })
+      );
+
+    expect(response.status).toBe(404);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.message).toBe("User not found");
+  });
+
+  it("should fail validation if update fields exceed 100 characters", async () => {
+    const response = await app
+      .handle(
+        new Request(`http://localhost/api/users/${createdUser.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "a".repeat(101),
+          }),
+        })
+      );
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.errors).toContain("Nama tidak boleh kosong atau lebih dari 100 karakter");
+  });
+
+  it("should fail validation if updating email to an already registered one", async () => {
+    // Let's create another user first
+    const otherUserRes = await app
+      .handle(
+        new Request("http://localhost/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "Second User",
+            email: "second@example.com",
+            password: "password123",
+          }),
+        })
+      )
+      .then((res) => res.json());
+
+    const response = await app
+      .handle(
+        new Request(`http://localhost/api/users/${createdUser.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: "second@example.com",
+          }),
+        })
+      );
+
+    expect(response.status).toBe(409);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.message).toBe("Email already registered");
+  });
+
   it("should delete user", async () => {
     const response = await app
       .handle(
@@ -162,6 +283,20 @@ describe("Elysia Users REST API", () => {
 
     expect(response.success).toBe(true);
     expect(response.message).toBe("User deleted successfully");
+  });
+
+  it("should return 404 for deleting non-existent user", async () => {
+    const response = await app
+      .handle(
+        new Request("http://localhost/api/users/99999", {
+          method: "DELETE",
+        })
+      );
+
+    expect(response.status).toBe(404);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+    expect(body.message).toBe("User not found");
   });
 
   it("should return 404 for non-existent user get", async () => {
