@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { db } from "../db/connection";
 import { sql } from "drizzle-orm";
 
@@ -23,4 +23,19 @@ export const healthRoutes = new Elysia({ prefix: "/api/health", detail: { tags: 
         timestamp: new Date().toISOString(),
       };
     }
+  }, {
+    response: {
+      200: t.Object({
+        status: t.String(),
+        uptime: t.Number(),
+        database: t.String(),
+        timestamp: t.String(),
+      }),
+      503: t.Object({
+        status: t.String(),
+        database: t.String(),
+        error: t.String(),
+        timestamp: t.String(),
+      }),
+    },
   });
