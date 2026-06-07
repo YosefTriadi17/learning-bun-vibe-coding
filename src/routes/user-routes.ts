@@ -45,9 +45,21 @@ export const userRoutes = new Elysia({ prefix: "/api/users" })
     }
   }, {
     body: t.Object({
-      name: t.String({ minLength: 1, maxLength: 100 }),
-      email: t.String({ format: "email", maxLength: 100 }),
-      password: t.String({ minLength: 6, maxLength: 100 }),
+      name: t.String({ 
+        minLength: 1, 
+        maxLength: 100, 
+        error: "Nama tidak boleh kosong atau lebih dari 100 karakter" 
+      }),
+      email: t.String({ 
+        format: "email", 
+        maxLength: 100, 
+        error: "Email tidak valid atau lebih dari 100 karakter" 
+      }),
+      password: t.String({ 
+        minLength: 6, 
+        maxLength: 100, 
+        error: "Password harus berukuran 6-100 karakter" 
+      }),
     }),
   })
   .put("/:id", async ({ params: { id }, body, set }) => {
@@ -77,9 +89,21 @@ export const userRoutes = new Elysia({ prefix: "/api/users" })
       id: t.Numeric(),
     }),
     body: t.Object({
-      name: t.Optional(t.String({ minLength: 1, maxLength: 100 })),
-      email: t.Optional(t.String({ format: "email", maxLength: 100 })),
-      password: t.Optional(t.String({ minLength: 6, maxLength: 100 })),
+      name: t.Optional(t.String({ 
+        minLength: 1, 
+        maxLength: 100, 
+        error: "Nama tidak boleh kosong atau lebih dari 100 karakter" 
+      })),
+      email: t.Optional(t.String({ 
+        format: "email", 
+        maxLength: 100, 
+        error: "Email tidak valid atau lebih dari 100 karakter" 
+      })),
+      password: t.Optional(t.String({ 
+        minLength: 6, 
+        maxLength: 100, 
+        error: "Password harus berukuran 6-100 karakter" 
+      })),
     }),
   })
   .delete("/:id", async ({ params: { id }, set }) => {
