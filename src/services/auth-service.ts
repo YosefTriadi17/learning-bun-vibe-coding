@@ -80,6 +80,12 @@ export class AuthService {
 
     if (!session) return null;
 
+    const now = new Date();
+    if (session.expiredAt < now) {
+      await db.delete(sessions).where(eq(sessions.token, token));
+      return null;
+    }
+
     const [user] = await db
       .select()
       .from(users)

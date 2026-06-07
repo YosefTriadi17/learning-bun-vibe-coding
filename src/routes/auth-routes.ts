@@ -48,54 +48,55 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
       password: t.String({ minLength: 1, maxLength: 100 }),
     }),
   })
-  .post("/logout", async ({ headers, set }) => {
-    const authHeader = headers["authorization"];
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      set.status = 401;
-      return {
-        success: false,
-        message: "Authorization token is required",
-      };
-    }
+  .group("", (app) =>
+    app
+      .derive(async ({ headers }) => {
+        const authHeader = headers["authorization"];
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+          return {
+            authError: "Authorization token is required",
+            user: null,
+            token: null,
+          };
+        }
 
-    const token = authHeader.replace("Bearer ", "");
-    const user = await authService.logout(token);
-    if (!user) {
-      set.status = 401;
-      return {
-        success: false,
-        message: "Invalid or expired token",
-      };
-    }
+        const token = authHeader.replace("Bearer ", "");
+        const user = await authService.getCurrentUser(token);
+        if (!user) {
+          return {
+            authError: "Invalid or expired token",
+            user: null,
+            token: null,
+          };
+        }
 
-    return {
-      success: true,
-      data: user,
-    };
-  })
-  .post("/current-user", async ({ headers, set }) => {
-    const authHeader = headers["authorization"];
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      set.status = 401;
-      return {
-        success: false,
-        message: "Authorization token is required",
-      };
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    const user = await authService.getCurrentUser(token);
-    if (!user) {
-      set.status = 401;
-      return {
-        success: false,
-        message: "Invalid or expired token",
-      };
-    }
-
-    return {
-      success: true,
-      data: user,
-    };
-  });
+        return {
+          authError: null,
+          user,
+          token,
+        };
+      })
+      .onBeforeHandle(({ authError, set }) => {
+        if (authError) {
+          set.status = 401;
+          return {
+            success: false,
+            message: authError,
+          };
+        }
+      })
+      .post("/logout", async ({ token }) => {
+        const user = await authService.logout(token!);
+        return {
+          success: true,
+          data: user!,
+        };
+      })
+      .post("/current-user", async ({ user }) => {
+        return {
+          success: true,
+          data: user!,
+        };
+      })
+  );
 
