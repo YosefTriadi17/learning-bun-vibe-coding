@@ -23,9 +23,21 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
     }
   }, {
     body: t.Object({
-      name: t.String({ minLength: 1, maxLength: 100 }),
-      email: t.String({ format: "email", maxLength: 100 }),
-      password: t.String({ minLength: 6, maxLength: 100 }),
+      name: t.String({ 
+        minLength: 1, 
+        maxLength: 100, 
+        error: "Nama tidak boleh kosong atau lebih dari 100 karakter" 
+      }),
+      email: t.String({ 
+        format: "email", 
+        maxLength: 100, 
+        error: "Email tidak valid atau lebih dari 100 karakter" 
+      }),
+      password: t.String({ 
+        minLength: 6, 
+        maxLength: 100, 
+        error: "Password harus berukuran 6-100 karakter" 
+      }),
     }),
   })
   .post("/login", async ({ body, set }) => {
@@ -44,8 +56,16 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
     };
   }, {
     body: t.Object({
-      email: t.String({ format: "email", maxLength: 100 }),
-      password: t.String({ minLength: 1, maxLength: 100 }),
+      email: t.String({ 
+        format: "email", 
+        maxLength: 100, 
+        error: "Email tidak valid atau lebih dari 100 karakter" 
+      }),
+      password: t.String({ 
+        minLength: 1, 
+        maxLength: 100, 
+        error: "Password tidak boleh kosong atau lebih dari 100 karakter" 
+      }),
     }),
   })
   .group("", (app) =>
